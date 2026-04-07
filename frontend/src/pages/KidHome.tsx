@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../api/client';
 import type { Child } from '../types';
+import { Avatar } from '../components/Avatar';
 import styles from './KidHome.module.css';
 
 function useCountUp(target: number, duration = 1200) {
@@ -27,8 +28,6 @@ function useCountUp(target: number, duration = 1200) {
 
   return value;
 }
-
-const AVATARS = ['🐱', '🐶', '🐰', '🐼', '🦊', '🐸'];
 
 export function KidHome() {
   const { childId } = useParams<{ childId: string }>();
@@ -104,7 +103,7 @@ export function KidHome() {
         animate={{ scale: 1, rotate: 0 }}
         transition={{ type: 'spring', stiffness: 200, damping: 15 }}
       >
-        <span className={styles.avatar}>{AVATARS[child.avatarIndex] ?? '🐱'}</span>
+        <Avatar avatarIndex={child.avatarIndex} avatarUrl={child.avatarUrl} size="lg" className={styles.avatar} />
         <h1 className={styles.name}>{child.name}の おこづかい</h1>
       </motion.div>
 

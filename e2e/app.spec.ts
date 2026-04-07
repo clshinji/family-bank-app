@@ -73,7 +73,7 @@ test.describe('おこづかいちょうアプリ E2Eテスト', () => {
     await page.getByText('りれきを みる').click();
     await expect(page.getByText('おこづかい りれき')).toBeVisible({ timeout: 10000 });
     // 取引履歴が表示される
-    await expect(page.getByText('おとうさん')).toBeVisible();
+    await expect(page.getByText('おとうさん').first()).toBeVisible();
   });
 
   test('子どもページ: 存在しないIDでエラー表示', async ({ page }) => {
@@ -92,6 +92,63 @@ test.describe('おこづかいちょうアプリ E2Eテスト', () => {
     const box = await numButton.boundingBox();
     expect(box).not.toBeNull();
     expect(box!.height).toBeGreaterThanOrEqual(48);
+  });
+
+  test('共有モーダル: QRコードとURLが表示される', async ({ page }) => {
+    await page.goto('/parent');
+    await page.getByText('たろう').first().waitFor();
+    // 共有ボタンをクリック
+    await page.getByText('QR / リンクを共有').first().click();
+    // モーダルが表示される
+    await expect(page.getByText('こども用ページ')).toBeVisible();
+    // QRコードが表示される (SVG)
+    await expect(page.locator('svg')).toBeVisible();
+    // URLが入力欄に表示される
+    const urlInput = page.locator('input[readonly]');
+    await expect(urlInput).toBeVisible();
+    const urlValue = await urlInput.inputValue();
+    expect(urlValue).toContain('/kids/');
+    // コピーボタンがある
+    await expect(page.getByText('コピー')).toBeVisible();
+    // 閉じる
+    await page.getByText('✕').click();
+    await expect(page.getByText('こども用ページ')).not.toBeVisible();
+  });
+
+  test('削除機能: 子どもを削除できる', async ({ page }) => {
+    // テスト用にユニークな名前で子どもを作成
+    const testName = `てすと${Date.now()}`;
+    const res = await fetch(`${API_URL}/children`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: testName, avatarIndex: 3 }),
+    });
+    const created = await res.json();
+
+    await page.goto('/parent');
+    await expect(page.getByText(testName)).toBeVisible({ timeout: 10000 });
+
+    // 削除ダイアログを承認
+    page.on('dialog', dialog => dialog.accept());
+    // 該当カードの削除ボタンをクリック
+    const card = page.locator(`a:has-text("${testName}")`).locator('..');
+    await card.getByText('削除').click();
+
+    // 削除後、一覧から消える
+    await expect(page.getByText(testName)).not.toBeVisible({ timeout: 10000 });
+
+    // APIでも削除されている
+    const checkRes = await fetch(`${API_URL}/children/${created.childId}`);
+    expect(checkRes.status).toBe(404);
+  });
+
+  test('親ダッシュボード: 写真アップロードボタンが表示される', async ({ page }) => {
+    await page.goto('/parent');
+    await page.getByText('たろう').first().waitFor();
+    // カメラアイコンの写真変更ボタンが存在する
+    const photoButtons = page.locator('button[title="写真を変更"]');
+    const count = await photoButtons.count();
+    expect(count).toBeGreaterThan(0);
   });
 
   test('デザイン: Zen Maru Gothicフォントが適用されている', async ({ page }) => {

@@ -1,0 +1,29 @@
+.image {
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.emoji {
+  line-height: 1;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.sm {
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.8rem;
+}
+
+.md {
+  width: 3rem;
+  height: 3rem;
+  font-size: 2.4rem;
+}
+
+.lg {
+  width: 4.5rem;
+  height: 4.5rem;
+  font-size: 4rem;
+}

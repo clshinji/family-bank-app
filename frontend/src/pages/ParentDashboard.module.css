@@ -7,6 +7,10 @@
   margin: 0 auto;
 }
 
+.hiddenInput {
+  display: none;
+}
+
 .header {
   padding: var(--space-lg) 0 var(--space-md);
   padding-top: calc(env(safe-area-inset-top, 0) + var(--space-lg));
@@ -25,6 +29,11 @@
   margin-bottom: var(--space-lg);
 }
 
+.childItem {
+  display: flex;
+  flex-direction: column;
+}
+
 .childCard {
   display: flex;
   align-items: center;
@@ -41,9 +50,29 @@
   box-shadow: 0 1px 6px var(--color-shadow);
 }
 
-.cardAvatar {
-  font-size: 2.4rem;
+.avatarWrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.avatarEditButton {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 24px;
+  height: 24px;
+  font-size: 0.7rem;
+  background: var(--color-bg-card);
+  border-radius: 50%;
+  box-shadow: 0 1px 4px var(--color-shadow-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
+}
+
+.avatarEditButton:active {
+  transform: scale(0.9);
 }
 
 .cardName {
@@ -62,13 +91,47 @@
   color: var(--color-expense);
 }
 
-.kidPageLink {
-  display: block;
-  text-align: right;
+.cardActions {
+  display: flex;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+}
+
+.shareButton {
+  flex: 1;
+  text-align: center;
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--color-accent);
-  padding: var(--space-xs) var(--space-md) 0;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-card);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 4px var(--color-shadow);
+  transition: transform 0.15s;
+}
+
+.shareButton:active {
+  transform: scale(0.97);
+}
+
+.deleteButton {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-light);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-card);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 4px var(--color-shadow);
+  transition: transform 0.15s, color 0.15s;
+}
+
+.deleteButton:active {
+  transform: scale(0.97);
+  color: var(--color-expense);
+}
+
+.deleteButton:disabled {
+  opacity: 0.5;
 }
 
 .formCard {

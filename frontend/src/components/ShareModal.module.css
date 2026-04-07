@@ -1,0 +1,127 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(92, 64, 51, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+  z-index: 100;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.modal {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl) var(--space-lg);
+  width: 100%;
+  max-width: 360px;
+  position: relative;
+  box-shadow: 0 16px 48px rgba(92, 64, 51, 0.2);
+}
+
+.closeButton {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  font-size: 1.2rem;
+  color: var(--color-text-light);
+  padding: var(--space-xs);
+  line-height: 1;
+}
+
+.profile {
+  text-align: center;
+  margin-bottom: var(--space-lg);
+}
+
+.avatar {
+  font-size: 3.5rem;
+  line-height: 1;
+  display: block;
+  margin-bottom: var(--space-sm);
+}
+
+.name {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--color-text);
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-light);
+  margin-top: var(--space-xs);
+}
+
+.qrArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+}
+
+.qrWrapper {
+  background: white;
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 12px var(--color-shadow);
+  line-height: 0;
+}
+
+.qrHint {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+  margin-top: var(--space-sm);
+  font-weight: 500;
+}
+
+.urlSection {
+  margin-top: var(--space-sm);
+}
+
+.urlLabel {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-light);
+  margin-bottom: var(--space-xs);
+}
+
+.urlRow {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.urlInput {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  color: var(--color-text);
+  font-weight: 500;
+  min-width: 0;
+  border: 2px solid transparent;
+}
+
+.urlInput:focus {
+  border-color: var(--color-primary);
+}
+
+.copyButton {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-primary);
+  color: var(--color-text);
+  font-weight: 700;
+  font-size: 0.85rem;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  transition: transform 0.15s;
+}
+
+.copyButton:active {
+  transform: scale(0.95);
+}

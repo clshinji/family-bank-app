@@ -3,6 +3,7 @@ export interface Child {
   name: string;
   balance: number;
   avatarIndex: number;
+  avatarUrl?: string;
   createdAt: string;
 }
 

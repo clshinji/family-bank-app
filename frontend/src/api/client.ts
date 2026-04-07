@@ -49,4 +49,25 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+
+  deleteChild: (childId: string) =>
+    request<{ deleted: boolean }>(`/children/${childId}`, {
+      method: 'DELETE',
+    }),
+
+  getAvatarUploadUrl: (childId: string, contentType: string) =>
+    request<{ uploadUrl: string; avatarUrl: string }>(`/children/${childId}/avatar`, {
+      method: 'POST',
+      body: JSON.stringify({ contentType }),
+    }),
+
+  async uploadAvatar(childId: string, file: File) {
+    const { uploadUrl, avatarUrl } = await this.getAvatarUploadUrl(childId, file.type);
+    await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': file.type },
+      body: file,
+    });
+    return avatarUrl;
+  },
 };
