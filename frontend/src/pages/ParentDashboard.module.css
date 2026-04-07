@@ -1,0 +1,180 @@
+.container {
+  min-height: 100dvh;
+  background: var(--color-bg);
+  padding: var(--space-md);
+  padding-bottom: var(--space-2xl);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.header {
+  padding: var(--space-lg) 0 var(--space-md);
+  padding-top: calc(env(safe-area-inset-top, 0) + var(--space-lg));
+}
+
+.title {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--color-text);
+}
+
+.childGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.childCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  background: var(--color-bg-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg) var(--space-md);
+  box-shadow: 0 2px 12px var(--color-shadow);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.childCard:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 6px var(--color-shadow);
+}
+
+.cardAvatar {
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.cardName {
+  font-size: 1.1rem;
+  font-weight: 700;
+  flex: 1;
+}
+
+.cardBalance {
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: var(--color-text);
+}
+
+.negative {
+  color: var(--color-expense);
+}
+
+.kidPageLink {
+  display: block;
+  text-align: right;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  padding: var(--space-xs) var(--space-md) 0;
+}
+
+.formCard {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  box-shadow: 0 4px 20px var(--color-shadow-strong);
+  margin-bottom: var(--space-lg);
+}
+
+.formTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: var(--space-md);
+}
+
+.input {
+  width: 100%;
+  padding: var(--space-md);
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: 500;
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  border-color: var(--color-primary);
+}
+
+.avatarPicker {
+  display: flex;
+  gap: var(--space-sm);
+  margin: var(--space-md) 0;
+  flex-wrap: wrap;
+}
+
+.avatarOption {
+  font-size: 2rem;
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  transition: transform 0.15s, background 0.15s;
+  background: transparent;
+}
+
+.avatarOption:active {
+  transform: scale(0.9);
+}
+
+.avatarSelected {
+  background: var(--color-primary-light);
+  transform: scale(1.1);
+}
+
+.formActions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+}
+
+.cancelButton {
+  padding: var(--space-sm) var(--space-lg);
+  font-weight: 700;
+  color: var(--color-text-light);
+  border-radius: var(--radius-full);
+}
+
+.submitButton {
+  padding: var(--space-sm) var(--space-lg);
+  font-weight: 700;
+  color: white;
+  background: var(--color-accent);
+  border-radius: var(--radius-full);
+  transition: transform 0.15s;
+}
+
+.submitButton:active {
+  transform: scale(0.95);
+}
+
+.submitButton:disabled {
+  opacity: 0.5;
+}
+
+.addButton {
+  display: block;
+  width: 100%;
+  padding: var(--space-md);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-accent);
+  background: var(--color-bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 12px var(--color-shadow);
+  border: 2px dashed var(--color-accent-light);
+  transition: transform 0.15s;
+}
+
+.addButton:active {
+  transform: scale(0.98);
+}
+
+.loadingArea {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-2xl);
+  font-size: 2.5rem;
+}

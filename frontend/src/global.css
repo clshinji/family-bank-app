@@ -1,0 +1,83 @@
+:root {
+  --color-primary: #FFD93D;
+  --color-primary-light: #FFF0B3;
+  --color-accent: #FF6B9D;
+  --color-accent-light: #FFB8D0;
+  --color-bg: #FFF8F0;
+  --color-bg-card: #FFFFFF;
+  --color-text: #5C4033;
+  --color-text-light: #8B7355;
+  --color-success: #4CAF50;
+  --color-success-light: #E8F5E9;
+  --color-expense: #FF7043;
+  --color-expense-light: #FBE9E7;
+  --color-shadow: rgba(92, 64, 51, 0.08);
+  --color-shadow-strong: rgba(92, 64, 51, 0.15);
+
+  --font-family: 'Zen Maru Gothic', 'Hiragino Maru Gothic Pro', sans-serif;
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-full: 9999px;
+
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-family);
+  color: var(--color-text);
+  background: var(--color-bg);
+  line-height: 1.6;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-size: inherit;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+input {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  border: none;
+  background: none;
+  outline: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+#root {
+  min-height: 100dvh;
+}

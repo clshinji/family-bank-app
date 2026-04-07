@@ -1,0 +1,146 @@
+.container {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xl);
+  padding: var(--space-xl) var(--space-md);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(170deg, #FFF8F0 0%, #FFF0B3 50%, #FFEAA0 100%);
+}
+
+.bgDecor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.floatingStar {
+  position: absolute;
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  opacity: 0.3;
+}
+
+.avatarArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  z-index: 1;
+}
+
+.avatar {
+  font-size: 4rem;
+  line-height: 1;
+  filter: drop-shadow(0 4px 8px var(--color-shadow));
+}
+
+.name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.balanceCard {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl) var(--space-2xl);
+  text-align: center;
+  box-shadow:
+    0 8px 32px var(--color-shadow),
+    0 2px 8px var(--color-shadow);
+  z-index: 1;
+  position: relative;
+  min-width: 280px;
+}
+
+.balanceCard::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: calc(var(--radius-lg) + 3px);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  z-index: -1;
+  opacity: 0.4;
+}
+
+.balanceNegative .balanceNumber {
+  color: var(--color-expense);
+}
+
+.balanceLabel {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text-light);
+  margin-bottom: var(--space-sm);
+  letter-spacing: 0.05em;
+}
+
+.balanceRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.balanceNumber {
+  font-size: clamp(2.5rem, 10vw, 4rem);
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--color-text);
+}
+
+.balanceUnit {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-text-light);
+}
+
+.historyButton {
+  display: inline-block;
+  background: var(--color-bg-card);
+  color: var(--color-accent);
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: var(--space-md) var(--space-xl);
+  border-radius: var(--radius-full);
+  box-shadow: 0 4px 16px var(--color-shadow);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  z-index: 1;
+}
+
+.historyButton:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 8px var(--color-shadow);
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+}
+
+.loadingCoin {
+  font-size: 3rem;
+}
+
+.errorCard {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.errorEmoji {
+  font-size: 3rem;
+}

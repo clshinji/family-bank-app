@@ -1,0 +1,12 @@
+{
+  "name": "family-bank-app",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "infra"
+  ],
+  "devDependencies": {
+    "@playwright/test": "^1.59.1"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "infra",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "cdk": "cdk",
+    "synth": "cdk synth --profile clshinji",
+    "deploy": "cdk deploy --all --profile clshinji",
+    "diff": "cdk diff --profile clshinji"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.175.0",
+    "constructs": "^10.4.0"
+  },
+  "devDependencies": {
+    "aws-cdk": "^2.175.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.0"
+  }
+}
