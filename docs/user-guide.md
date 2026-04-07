@@ -10,7 +10,7 @@ aws cloudformation describe-stacks --stack-name FamilyBankFrontend --profile cls
   --query 'Stacks[0].Outputs[?OutputKey==`DistributionUrl`].OutputValue' --output text
 ```
 
-表示されたURL（例: `https://dm4ne9bmy3let.cloudfront.net`）の末尾に `/parent` をつけると親ダッシュボード、`/kids/{childId}` をつけると子ども用ページにアクセスできます。
+表示されたURL（例: `https://xxxxxxxx.cloudfront.net`）の末尾に `/parent` をつけると親ダッシュボード、`/kids/{childId}` をつけると子ども用ページにアクセスできます。
 
 子ども用ページのURLは、親ダッシュボード（`/parent`）の各子どもカードの下にある「こども用ページ →」リンクからも確認できます。
 

@@ -7,3 +7,4 @@ cdk.out/
 *.d.ts
 !vite.config.ts
 .DS_Store
+test-results/

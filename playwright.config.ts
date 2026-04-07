@@ -6,7 +6,7 @@ export default defineConfig({
   workers: 1,
   fullyParallel: false,
   use: {
-    baseURL: 'https://dm4ne9bmy3let.cloudfront.net',
+    baseURL: process.env.BASE_URL ?? 'http://localhost:3000',
     viewport: { width: 390, height: 844 },
     screenshot: 'on',
   },

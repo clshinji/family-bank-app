@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const API_URL = 'https://9j3x7yoini.execute-api.ap-northeast-1.amazonaws.com/prod';
+const API_URL = process.env.API_URL ?? 'http://localhost:3001';
 
 test.describe('おこづかいちょうアプリ E2Eテスト', () => {
 
