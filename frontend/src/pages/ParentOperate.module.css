@@ -2,7 +2,7 @@
   min-height: 100dvh;
   background: var(--color-bg);
   padding: var(--space-md);
-  padding-bottom: var(--space-2xl);
+  padding-bottom: 100px;
   max-width: 480px;
   margin: 0 auto;
 }
@@ -10,13 +10,13 @@
 .header {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
-  margin-bottom: var(--space-lg);
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
   padding-top: env(safe-area-inset-top, 0);
 }
 
 .backButton {
-  font-size: 0.9rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: var(--color-accent);
   padding: var(--space-xs) var(--space-sm);
@@ -30,7 +30,7 @@
 }
 
 .currentBalance {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--color-text-light);
 }
@@ -39,47 +39,19 @@
   color: var(--color-expense);
 }
 
-.successBanner {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  background: var(--color-success-light);
-  color: var(--color-success);
-  padding: var(--space-md);
-  border-radius: var(--radius-sm);
-  margin-bottom: var(--space-md);
-  font-weight: 700;
-}
-
-.dismissButton {
-  margin-left: auto;
-  font-size: 1rem;
-  color: var(--color-success);
-  opacity: 0.6;
-}
-
-.errorBanner {
-  background: var(--color-expense-light);
-  color: var(--color-expense);
-  padding: var(--space-md);
-  border-radius: var(--radius-sm);
-  margin-bottom: var(--space-md);
-  font-weight: 700;
-}
-
+/* モードトグル */
 .modeToggle {
   display: flex;
-  gap: 0;
   background: var(--color-bg-card);
   border-radius: var(--radius-full);
-  padding: 4px;
+  padding: 3px;
   box-shadow: 0 2px 8px var(--color-shadow);
-  margin-bottom: var(--space-lg);
+  margin-bottom: var(--space-md);
 }
 
 .modeButton {
   flex: 1;
-  padding: var(--space-sm) var(--space-md);
+  padding: var(--space-sm);
   font-size: 1rem;
   font-weight: 700;
   border-radius: var(--radius-full);
@@ -97,51 +69,122 @@
   color: white;
 }
 
+/* だれが？ */
+.nameSection {
+  margin-bottom: var(--space-md);
+}
+
+.quickNames {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: center;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.quickNames::-webkit-scrollbar {
+  display: none;
+}
+
+.quickNamePill {
+  padding: var(--space-xs) var(--space-md);
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-card);
+  box-shadow: 0 1px 4px var(--color-shadow);
+  color: var(--color-text-light);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+
+.quickNameActive {
+  background: var(--color-primary);
+  color: var(--color-text);
+}
+
+.usageInput {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  font-size: 0.95rem;
+  font-weight: 500;
+  background: var(--color-bg-card);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 4px var(--color-shadow);
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.usageInput:focus {
+  border-color: var(--color-expense);
+}
+
+.nameInput {
+  flex-shrink: 0;
+  width: 100px;
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: var(--color-bg-card);
+  border-radius: var(--radius-full);
+  box-shadow: 0 1px 4px var(--color-shadow);
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.nameInput:focus {
+  border-color: var(--color-primary);
+  width: 140px;
+}
+
+/* 金額表示 */
 .amountDisplay {
   display: flex;
   align-items: baseline;
   justify-content: center;
   gap: var(--space-xs);
-  padding: var(--space-md) 0;
-  margin-bottom: var(--space-md);
+  padding: var(--space-sm) 0;
+  margin-bottom: var(--space-sm);
 }
 
 .amountPrefix {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: var(--color-text-light);
 }
 
 .amountValue {
-  font-size: clamp(2rem, 8vw, 3rem);
+  font-size: clamp(2rem, 8vw, 2.8rem);
   font-weight: 900;
   color: var(--color-text);
-  min-width: 2ch;
-  text-align: center;
 }
 
 .amountUnit {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--color-text-light);
 }
 
+/* NumPad */
 .numPad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-sm);
-  margin-bottom: var(--space-lg);
+  gap: 6px;
+  margin-bottom: var(--space-md);
 }
 
 .numKey {
-  padding: var(--space-md);
-  font-size: 1.4rem;
+  padding: var(--space-sm);
+  font-size: 1.3rem;
   font-weight: 700;
   background: var(--color-bg-card);
   border-radius: var(--radius-sm);
   box-shadow: 0 2px 6px var(--color-shadow);
   transition: transform 0.1s, box-shadow 0.1s;
-  min-height: 56px;
+  min-height: 52px;
 }
 
 .numKey:active {
@@ -155,109 +198,54 @@
   box-shadow: none;
 }
 
-.nameSection,
-.memoSection {
+/* メモ */
+.memoToggle {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-light);
+  padding: var(--space-sm);
   margin-bottom: var(--space-md);
 }
 
-.label {
-  display: block;
-  font-size: 0.85rem;
+.memoInput {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-bg-card);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 1px 4px var(--color-shadow);
+  margin-bottom: var(--space-md);
+}
+
+/* 最近のやりとり */
+.recentSection {
+  margin-bottom: var(--space-md);
+}
+
+.recentTitle {
+  font-size: 0.8rem;
   font-weight: 700;
   color: var(--color-text-light);
   margin-bottom: var(--space-xs);
 }
 
-.quickNames {
-  display: flex;
-  gap: var(--space-xs);
-  flex-wrap: wrap;
-  margin-bottom: var(--space-sm);
-}
-
-.quickNamePill {
-  padding: var(--space-xs) var(--space-md);
-  font-size: 0.85rem;
-  font-weight: 700;
-  border-radius: var(--radius-full);
-  background: var(--color-bg-card);
-  box-shadow: 0 1px 4px var(--color-shadow);
-  color: var(--color-text-light);
-  transition: background 0.15s, color 0.15s;
-}
-
-.quickNameActive {
-  background: var(--color-primary);
-  color: var(--color-text);
-}
-
-.input {
-  width: 100%;
-  padding: var(--space-md);
-  background: var(--color-bg-card);
-  border-radius: var(--radius-sm);
-  font-size: 0.95rem;
-  border: 2px solid transparent;
-  box-shadow: 0 1px 4px var(--color-shadow);
-  transition: border-color 0.2s;
-}
-
-.input:focus {
-  border-color: var(--color-primary);
-}
-
-.submitButton {
-  display: block;
-  width: 100%;
-  padding: var(--space-md);
-  font-size: 1.2rem;
-  font-weight: 900;
-  color: white;
-  border-radius: var(--radius-md);
-  margin-top: var(--space-md);
-  transition: transform 0.15s;
-}
-
-.submitButton:active {
-  transform: scale(0.97);
-}
-
-.submitButton:disabled {
-  opacity: 0.4;
-}
-
-.submitIncome {
-  background: var(--color-success);
-}
-
-.submitExpense {
-  background: var(--color-expense);
-}
-
-.recentSection {
-  margin-top: var(--space-xl);
-}
-
-.recentTitle {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--color-text-light);
-  margin-bottom: var(--space-sm);
-}
-
 .recentList {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
+  gap: 2px;
 }
 
 .recentItem {
   display: flex;
   justify-content: space-between;
-  padding: var(--space-sm) var(--space-md);
+  padding: var(--space-xs) var(--space-sm);
   background: var(--color-bg-card);
   border-radius: var(--radius-sm);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 
 .recentName {
@@ -275,6 +263,42 @@
 
 .recentExpense {
   color: var(--color-expense);
+}
+
+/* 実行ボタン (fixed bottom) */
+.fixedBottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: var(--space-sm) var(--space-md);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0) + var(--space-sm));
+  background: linear-gradient(to top, var(--color-bg) 60%, transparent);
+  z-index: 50;
+}
+
+.submitButton {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: var(--space-md);
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: white;
+  border-radius: var(--radius-md);
+}
+
+.submitButton:disabled {
+  opacity: 0.4;
+}
+
+.submitIncome {
+  background: var(--color-success);
+}
+
+.submitExpense {
+  background: var(--color-expense);
 }
 
 .loadingArea {

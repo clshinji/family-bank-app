@@ -5,6 +5,8 @@ import { api } from '../api/client';
 import type { Child } from '../types';
 import { ShareModal } from '../components/ShareModal';
 import { Avatar, AVATARS } from '../components/Avatar';
+import { ImageCropModal } from '../components/ImageCropModal';
+import { Toast } from '../components/Toast';
 import styles from './ParentDashboard.module.css';
 
 export function ParentDashboard() {
@@ -19,6 +21,11 @@ export function ParentDashboard() {
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadTargetId, setUploadTargetId] = useState<string | null>(null);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropTargetId, setCropTargetId] = useState<string | null>(null);
+  const [toast, setToast] = useState({ visible: false, message: '', type: 'success' as 'success' | 'error' });
+  const [confirmDelete, setConfirmDelete] = useState<Child | null>(null);
+  const [confirmStep, setConfirmStep] = useState<1 | 2>(1);
 
   const fetchChildren = async () => {
     const res = await api.listChildren();
@@ -38,34 +45,62 @@ export function ParentDashboard() {
     setShowForm(false);
     await fetchChildren();
     setSubmitting(false);
+    setToast({ visible: true, message: 'こどもを追加しました', type: 'success' });
   };
 
-  const handleDelete = async (child: Child) => {
-    if (!confirm(`「${child.name}」を削除しますか？\nおこづかいの履歴もすべて消えます。`)) return;
+  const handleDeleteStep = async () => {
+    if (!confirmDelete) return;
+    if (confirmStep === 1) {
+      setConfirmStep(2);
+      return;
+    }
+    // Step 2: actually delete
+    const child = confirmDelete;
+    setConfirmDelete(null);
+    setConfirmStep(1);
     setDeletingId(child.childId);
-    await api.deleteChild(child.childId);
-    await fetchChildren();
+    try {
+      await api.deleteChild(child.childId);
+      await fetchChildren();
+      setToast({ visible: true, message: `${child.name}を削除しました`, type: 'success' });
+    } catch {
+      setToast({ visible: true, message: '削除に失敗しました', type: 'error' });
+    }
     setDeletingId(null);
   };
 
-  const handlePhotoClick = (childId: string) => {
+  const handleDeleteCancel = () => {
+    setConfirmDelete(null);
+    setConfirmStep(1);
+  };
+
+  const handleAvatarClick = (childId: string) => {
     setUploadTargetId(childId);
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !uploadTargetId) return;
-    setUploadingId(uploadTargetId);
+    setCropFile(file);
+    setCropTargetId(uploadTargetId);
+    e.target.value = '';
+  };
+
+  const handleCropped = async (blob: Blob) => {
+    if (!cropTargetId) return;
+    setUploadingId(cropTargetId);
+    setCropFile(null);
     try {
-      await api.uploadAvatar(uploadTargetId, file);
+      const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg' });
+      await api.uploadAvatar(cropTargetId, file);
       await fetchChildren();
+      setToast({ visible: true, message: '写真を変更しました', type: 'success' });
     } catch {
-      alert('アップロードに失敗しました');
+      setToast({ visible: true, message: 'アップロードに失敗しました', type: 'error' });
     }
     setUploadingId(null);
-    setUploadTargetId(null);
-    e.target.value = '';
+    setCropTargetId(null);
   };
 
   return (
@@ -76,6 +111,13 @@ export function ParentDashboard() {
         accept="image/jpeg,image/png,image/webp"
         className={styles.hiddenInput}
         onChange={handleFileChange}
+      />
+
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        visible={toast.visible}
+        onDismiss={() => setToast(t => ({ ...t, visible: false }))}
       />
 
       <header className={styles.header}>
@@ -105,21 +147,21 @@ export function ParentDashboard() {
                   transition={{ delay: i * 0.08 }}
                 >
                   <Link to={`/parent/${child.childId}`} className={styles.childCard}>
-                    <div className={styles.avatarWrapper}>
+                    <button
+                      className={styles.avatarTap}
+                      onClick={(e) => { e.preventDefault(); handleAvatarClick(child.childId); }}
+                      disabled={uploadingId === child.childId}
+                      title="写真を変更"
+                    >
                       <Avatar
                         avatarIndex={child.avatarIndex}
                         avatarUrl={child.avatarUrl}
                         size="md"
                       />
-                      <button
-                        className={styles.avatarEditButton}
-                        onClick={(e) => { e.preventDefault(); handlePhotoClick(child.childId); }}
-                        disabled={uploadingId === child.childId}
-                        title="写真を変更"
-                      >
+                      <span className={styles.avatarOverlay}>
                         {uploadingId === child.childId ? '...' : '📷'}
-                      </button>
-                    </div>
+                      </span>
+                    </button>
                     <span className={styles.cardName}>{child.name}</span>
                     <span className={`${styles.cardBalance} ${child.balance < 0 ? styles.negative : ''}`}>
                       {child.balance.toLocaleString()} えん
@@ -134,7 +176,7 @@ export function ParentDashboard() {
                     </button>
                     <button
                       className={styles.deleteButton}
-                      onClick={() => handleDelete(child)}
+                      onClick={(e) => { e.stopPropagation(); setConfirmStep(1); setConfirmDelete(child); }}
                       disabled={deletingId === child.childId}
                     >
                       {deletingId === child.childId ? '削除中...' : '削除'}
@@ -204,6 +246,54 @@ export function ParentDashboard() {
       )}
       {shareChild && (
         <ShareModal child={shareChild} onClose={() => setShareChild(null)} />
+      )}
+      <AnimatePresence>
+        {cropFile && cropTargetId && (
+          <ImageCropModal
+            imageFile={cropFile}
+            onCropped={handleCropped}
+            onCancel={() => { setCropFile(null); setCropTargetId(null); }}
+          />
+        )}
+      </AnimatePresence>
+      {confirmDelete && (
+        <div className={styles.confirmOverlay} onClick={handleDeleteCancel}>
+          <div className={styles.confirmCard} onClick={e => e.stopPropagation()}>
+            {confirmStep === 1 ? (
+              <>
+                <p className={styles.confirmEmoji}>⚠️</p>
+                <p className={styles.confirmText}>
+                  「{confirmDelete.name}」を削除しますか？
+                </p>
+                <p className={styles.confirmSub}>おこづかいの履歴もすべて消えます</p>
+                <div className={styles.confirmActions}>
+                  <button className={styles.cancelButton} onClick={handleDeleteCancel}>
+                    やめる
+                  </button>
+                  <button className={styles.confirmDeleteBtn} onClick={handleDeleteStep}>
+                    削除する
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className={styles.confirmEmoji}>🚨</p>
+                <p className={styles.confirmText}>
+                  本当に削除しますか？
+                </p>
+                <p className={styles.confirmSub}>この操作は取り消せません</p>
+                <div className={styles.confirmActions}>
+                  <button className={styles.cancelButton} onClick={handleDeleteCancel}>
+                    やっぱりやめる
+                  </button>
+                  <button className={styles.confirmDeleteBtnFinal} onClick={handleDeleteStep}>
+                    はい、削除します
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

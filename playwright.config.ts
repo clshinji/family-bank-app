@@ -3,6 +3,8 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: './e2e',
   timeout: 30000,
+  workers: 1,
+  fullyParallel: false,
   use: {
     baseURL: 'https://dm4ne9bmy3let.cloudfront.net',
     viewport: { width: 390, height: 844 },

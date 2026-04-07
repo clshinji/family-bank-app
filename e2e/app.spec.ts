@@ -12,8 +12,8 @@ test.describe('おこづかいちょうアプリ E2Eテスト', () => {
   test('親ダッシュボード: 子ども一覧が表示される', async ({ page }) => {
     await page.goto('/parent');
     // たろう、はなこ が既に登録済み
-    await expect(page.getByText('たろう')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText('はなこ')).toBeVisible();
+    await expect(page.getByText('たろう').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('はなこ').first()).toBeVisible();
   });
 
   test('親ダッシュボード: 子ども追加フォームが開閉する', async ({ page }) => {
@@ -45,11 +45,11 @@ test.describe('おこづかいちょうアプリ E2Eテスト', () => {
     await page.getByRole('button', { name: '1', exact: true }).click();
     await page.getByRole('button', { name: '0', exact: true }).click();
     await page.getByRole('button', { name: '0', exact: true }).click();
-    await expect(page.getByText('100')).toBeVisible();
+    await expect(page.getByText('100', { exact: true })).toBeVisible();
 
     // Cで消去
     await page.getByRole('button', { name: 'C', exact: true }).click();
-    await expect(page.getByText('+0')).toBeVisible();
+    await expect(page.getByText('だれが？を えらんでね')).toBeVisible();
   });
 
   test('子どもページ: 残高が表示される', async ({ page }) => {
@@ -69,10 +69,20 @@ test.describe('おこづかいちょうアプリ E2Eテスト', () => {
     const data = await res.json();
     const taro = data.children.find((c: { name: string }) => c.name === 'たろう');
 
+    // 取引がない場合は作成
+    const txnRes = await fetch(`${API_URL}/children/${taro.childId}/transactions`);
+    const txnData = await txnRes.json();
+    if (txnData.items.length === 0) {
+      await fetch(`${API_URL}/children/${taro.childId}/transactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ personName: 'おとうさん', amount: 100, type: 'income' }),
+      });
+    }
+
     await page.goto(`/kids/${taro.childId}`);
     await page.getByText('りれきを みる').click();
     await expect(page.getByText('おこづかい りれき')).toBeVisible({ timeout: 10000 });
-    // 取引履歴が表示される
     await expect(page.getByText('おとうさん').first()).toBeVisible();
   });
 
@@ -128,26 +138,31 @@ test.describe('おこづかいちょうアプリ E2Eテスト', () => {
     await page.goto('/parent');
     await expect(page.getByText(testName)).toBeVisible({ timeout: 10000 });
 
-    // 削除ダイアログを承認
-    page.on('dialog', dialog => dialog.accept());
     // 該当カードの削除ボタンをクリック
     const card = page.locator(`a:has-text("${testName}")`).locator('..');
     await card.getByText('削除').click();
 
-    // 削除後、一覧から消える
-    await expect(page.getByText(testName)).not.toBeVisible({ timeout: 10000 });
+    // 確認モーダル Step 1
+    await expect(page.getByText('を削除しますか？')).toBeVisible();
+    await page.getByText('削除する').click();
+    // 確認モーダル Step 2
+    await expect(page.getByText('本当に削除しますか？')).toBeVisible();
+    await page.getByText('はい、削除します').click();
+
+    // 削除後、一覧のカードから消える
+    await expect(page.locator(`a:has-text("${testName}")`)).not.toBeVisible({ timeout: 10000 });
 
     // APIでも削除されている
     const checkRes = await fetch(`${API_URL}/children/${created.childId}`);
     expect(checkRes.status).toBe(404);
   });
 
-  test('親ダッシュボード: 写真アップロードボタンが表示される', async ({ page }) => {
+  test('親ダッシュボード: アバタータップで写真変更できる', async ({ page }) => {
     await page.goto('/parent');
     await page.getByText('たろう').first().waitFor();
-    // カメラアイコンの写真変更ボタンが存在する
-    const photoButtons = page.locator('button[title="写真を変更"]');
-    const count = await photoButtons.count();
+    // アバタータップボタン(写真変更)が存在する
+    const avatarButtons = page.locator('button[title="写真を変更"]');
+    const count = await avatarButtons.count();
     expect(count).toBeGreaterThan(0);
   });
 
