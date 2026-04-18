@@ -21,6 +21,21 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     updates.push('avatarIndex = :avatar');
     values[':avatar'] = body.avatarIndex;
   }
+  if (body.color !== undefined) {
+    const ALLOWED_COLORS = ['pink', 'mint', 'sun', 'lavender'];
+    if (!ALLOWED_COLORS.includes(body.color)) {
+      return json(400, { error: 'invalid color' });
+    }
+    updates.push('color = :color');
+    values[':color'] = body.color;
+  }
+  if (body.deco !== undefined) {
+    if (!Array.isArray(body.deco)) {
+      return json(400, { error: 'deco must be an array' });
+    }
+    updates.push('deco = :deco');
+    values[':deco'] = body.deco.filter((d: unknown): d is string => typeof d === 'string');
+  }
 
   if (updates.length === 0) {
     return json(400, { error: 'No fields to update' });
@@ -42,6 +57,9 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     name: item.name,
     balance: item.balance,
     avatarIndex: item.avatarIndex,
+    avatarUrl: item.avatarUrl,
+    color: item.color ?? 'pink',
+    deco: item.deco ?? [],
     createdAt: item.createdAt,
   });
 };

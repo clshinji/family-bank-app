@@ -1,9 +1,13 @@
+export type ThemeColor = 'pink' | 'mint' | 'sun' | 'lavender';
+
 export interface Child {
   childId: string;
   name: string;
   balance: number;
   avatarIndex: number;
   avatarUrl?: string;
+  color?: ThemeColor;
+  deco?: string[];
   createdAt: string;
 }
 

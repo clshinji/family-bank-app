@@ -19,13 +19,23 @@ export const api = {
   getChild: (childId: string) =>
     request<import('../types').Child>(`/children/${childId}`),
 
-  createChild: (data: { name: string; avatarIndex?: number }) =>
+  createChild: (data: {
+    name: string;
+    avatarIndex?: number;
+    color?: import('../types').ThemeColor;
+    deco?: string[];
+  }) =>
     request<import('../types').Child>('/children', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
-  updateChild: (childId: string, data: { name?: string; avatarIndex?: number }) =>
+  updateChild: (childId: string, data: {
+    name?: string;
+    avatarIndex?: number;
+    color?: import('../types').ThemeColor;
+    deco?: string[];
+  }) =>
     request<import('../types').Child>(`/children/${childId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
@@ -49,6 +59,19 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+
+  updateTransaction: (
+    childId: string,
+    txnId: string,
+    data: { personName?: string; memo?: string | null },
+  ) =>
+    request<import('../types').Transaction>(
+      `/children/${childId}/transactions/${encodeURIComponent(txnId)}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      },
+    ),
 
   deleteChild: (childId: string) =>
     request<{ deleted: boolean }>(`/children/${childId}`, {
