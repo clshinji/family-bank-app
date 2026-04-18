@@ -6,8 +6,10 @@
 
 - 子どもの残高をかわいいページで確認
 - おこづかいの付与・回収（使用）を記録
-- 入出金の履歴を確認
-- 複数の子どもを登録・管理
+- 入出金の履歴を確認・編集
+- 複数の子どもを登録・削除・管理
+- アバター画像のアップロード（トリミング対応）
+- 子ども用ページのQRコード共有
 
 ## URL
 
@@ -25,6 +27,7 @@
 | フロントエンド | React 18, Vite, TypeScript, CSS Modules, Framer Motion |
 | バックエンド | AWS Lambda (Node.js 22), API Gateway (REST) |
 | データベース | Amazon DynamoDB (Single-Table Design) |
+| ストレージ | Amazon S3 (アバター画像) |
 | ホスティング | Amazon S3 + CloudFront |
 | IaC | AWS CDK v2 (TypeScript) |
 | テスト | Playwright (E2E) |
@@ -35,17 +38,19 @@
 family-bank-app/
 ├── frontend/          # React SPA
 │   ├── src/
-│   │   ├── pages/     # KidHome, KidHistory, ParentDashboard, ParentOperate
-│   │   ├── api/       # APIクライアント
-│   │   └── types/     # 型定義
+│   │   ├── pages/       # KidHome, KidHistory, ParentDashboard, ParentOperate
+│   │   ├── components/  # Avatar, ImageCropModal, ShareModal, PigMascot, Toast 等
+│   │   ├── api/         # APIクライアント
+│   │   └── types/       # 型定義
 │   └── vite.config.ts
 ├── backend/           # Lambda関数
 │   └── src/handlers/  # getChild, listChildren, createChild, updateChild,
-│                      # getTransactions, postTransaction
+│                      # deleteChild, getAvatarUploadUrl,
+│                      # getTransactions, postTransaction, updateTransaction
 ├── infra/             # CDKスタック
 │   ├── bin/app.ts
 │   └── lib/
-│       ├── backend-stack.ts   # DynamoDB + Lambda + API Gateway
+│       ├── backend-stack.ts   # DynamoDB + S3 (avatars) + Lambda + API Gateway
 │       └── frontend-stack.ts  # S3 + CloudFront
 ├── e2e/               # Playwright E2Eテスト
 └── playwright.config.ts
@@ -121,8 +126,11 @@ npx playwright test
 | POST | `/children` | 子ども登録 |
 | GET | `/children/{childId}` | 子どものプロフィール+残高 |
 | PUT | `/children/{childId}` | 子どものプロフィール更新 |
+| DELETE | `/children/{childId}` | 子ども削除 |
+| POST | `/children/{childId}/avatar` | アバター画像アップロード用の署名付きURL発行 |
 | GET | `/children/{childId}/transactions` | 取引履歴（新しい順、ページネーション対応） |
 | POST | `/children/{childId}/transactions` | 取引作成（付与 or 回収） |
+| PUT | `/children/{childId}/transactions/{txnId}` | 取引の編集 |
 
 ## DynamoDBテーブル設計
 
@@ -135,3 +143,10 @@ npx playwright test
 
 - 残高更新は `TransactWriteItems` で原子的に実行
 - マイナス残高を許容（親の立て替え対応）
+- 取引編集時も差額を `TransactWriteItems` で残高に反映
+
+## アバター画像の仕組み
+
+- S3バケットに `avatars/` プレフィックスで保存（公開読み取り）
+- クライアントはAPIから発行された署名付きURLでPUTアップロード
+- アップロード前に `ImageCropModal` で正方形にトリミング
