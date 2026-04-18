@@ -19,13 +19,23 @@ export const api = {
   getChild: (childId: string) =>
     request<import('../types').Child>(`/children/${childId}`),
 
-  createChild: (data: { name: string; avatarIndex?: number }) =>
+  createChild: (data: {
+    name: string;
+    avatarIndex?: number;
+    color?: import('../types').ThemeColor;
+    deco?: string[];
+  }) =>
     request<import('../types').Child>('/children', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
-  updateChild: (childId: string, data: { name?: string; avatarIndex?: number }) =>
+  updateChild: (childId: string, data: {
+    name?: string;
+    avatarIndex?: number;
+    color?: import('../types').ThemeColor;
+    deco?: string[];
+  }) =>
     request<import('../types').Child>(`/children/${childId}`, {
       method: 'PUT',
       body: JSON.stringify(data),

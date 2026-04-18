@@ -1,90 +1,111 @@
-import { useEffect, useState, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/client';
 import type { Child, Transaction } from '../types';
+import { PigMascot } from '../components/PigMascot';
+import { THEMES } from '../components/theme';
 import { Toast } from '../components/Toast';
 import styles from './ParentOperate.module.css';
 
-const QUICK_NAMES = ['おとうさん', 'おかあさん', 'おじいちゃん', 'おばあちゃん'];
+const QUICK_NAMES = ['おかあさん', 'おとうさん', 'おばあちゃん', 'おじいちゃん'];
+
+function fmtRelative(iso: string) {
+  const d = new Date(iso);
+  const now = new Date();
+  const diff = Math.floor(
+    (new Date(now).setHours(0, 0, 0, 0) - new Date(d).setHours(0, 0, 0, 0)) / 86400000,
+  );
+  if (diff === 0) return 'きょう';
+  if (diff === 1) return 'きのう';
+  if (diff < 7) return `${diff}にちまえ`;
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
 
 export function ParentOperate() {
   const { childId } = useParams<{ childId: string }>();
+  const navigate = useNavigate();
+
   const [child, setChild] = useState<Child | null>(null);
+  const [recent, setRecent] = useState<Transaction[]>([]);
   const [mode, setMode] = useState<'income' | 'expense'>('income');
   const [amount, setAmount] = useState('');
-  const [personName, setPersonName] = useState('');
-  const [showMemo, setShowMemo] = useState(false);
   const [memo, setMemo] = useState('');
+  const [by, setBy] = useState('おかあさん');
   const [submitting, setSubmitting] = useState(false);
-  const [toast, setToast] = useState({ visible: false, message: '', type: 'success' as 'success' | 'error' });
-  const [recentTxns, setRecentTxns] = useState<Transaction[]>([]);
+  const [toast, setToast] = useState({
+    visible: false,
+    message: '',
+    type: 'success' as 'success' | 'error',
+  });
 
-  useEffect(() => {
+  const refresh = useCallback(async () => {
     if (!childId) return;
-    api.getChild(childId).then(setChild);
-    api.getTransactions(childId, 5).then(res => setRecentTxns(res.items));
+    const [c, t] = await Promise.all([
+      api.getChild(childId),
+      api.getTransactions(childId, 5),
+    ]);
+    setChild(c);
+    setRecent(t.items);
   }, [childId]);
 
-  const handleNumPad = (val: string) => {
-    if (val === 'C') {
-      setAmount('');
-    } else if (val === '⌫') {
-      setAmount(prev => prev.slice(0, -1));
-    } else {
-      setAmount(prev => {
-        if (prev.length >= 7) return prev;
-        if (prev === '' && val === '0') return prev;
-        return prev + val;
-      });
-    }
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  const handleKey = (k: string) => {
+    if (k === 'AC') setAmount('');
+    else if (k === '⌫') setAmount(a => a.slice(0, -1));
+    else if (k === '00') setAmount(a => (a === '' ? '' : (a + '00').slice(0, 7)));
+    else setAmount(a => (a === '0' ? k : (a + k).slice(0, 7)));
   };
 
-  const handleSubmit = useCallback(async () => {
-    if (!childId || !amount || !personName.trim() || submitting) return;
+  const submit = async () => {
+    if (!child || !amount || !by.trim() || submitting) return;
+    const n = parseInt(amount, 10);
+    if (!n) return;
     setSubmitting(true);
     try {
-      const txn = await api.postTransaction(childId, {
-        personName: personName.trim(),
-        amount: parseInt(amount, 10),
+      await api.postTransaction(child.childId, {
         type: mode,
+        amount: n,
         memo: memo.trim() || undefined,
-      });
-      const label = mode === 'income' ? 'あげました' : 'つかいました';
-      setToast({
-        visible: true,
-        message: `${txn.amount.toLocaleString()}えん ${label}`,
-        type: 'success',
+        personName: by.trim(),
       });
       setAmount('');
       setMemo('');
-      setShowMemo(false);
-      const updated = await api.getChild(childId);
-      setChild(updated);
-      const txns = await api.getTransactions(childId, 5);
-      setRecentTxns(txns.items);
-    } catch (e: unknown) {
+      await refresh();
       setToast({
         visible: true,
-        message: e instanceof Error ? e.message : 'エラーが発生しました',
+        message: mode === 'income' ? `¥${n.toLocaleString()} あげました` : `¥${n.toLocaleString()} つかいました`,
+        type: 'success',
+      });
+    } catch (e) {
+      setToast({
+        visible: true,
+        message: e instanceof Error ? e.message : 'エラーがおこりました',
         type: 'error',
       });
     }
     setSubmitting(false);
-  }, [childId, amount, personName, submitting, mode, memo]);
+  };
 
   if (!child) {
     return (
-      <div className={styles.container}>
-        <div className={styles.loadingArea}>🪙</div>
+      <div className={styles.loading}>
+        <PigMascot size={120} mood="sleepy" />
       </div>
     );
   }
 
-  const canSubmit = !!amount && !!personName.trim() && !submitting;
+  const swatch = THEMES[child.color ?? 'pink'].swatch;
+  const preview =
+    mode === 'income'
+      ? child.balance + parseInt(amount || '0', 10)
+      : child.balance - parseInt(amount || '0', 10);
+  const canSubmit = !!amount && !!by.trim() && !submitting;
 
   return (
-    <div className={styles.container}>
+    <div className={styles.screen}>
       <Toast
         message={toast.message}
         type={toast.type}
@@ -93,139 +114,182 @@ export function ParentOperate() {
       />
 
       <header className={styles.header}>
-        <Link to="/parent" className={styles.backButton}>←</Link>
-        <h1 className={styles.title}>{child.name}</h1>
-        <span className={`${styles.currentBalance} ${child.balance < 0 ? styles.negative : ''}`}>
-          {child.balance.toLocaleString()} えん
-        </span>
+        <button
+          type="button"
+          className={styles.back}
+          onClick={() => navigate('/parent')}
+          aria-label="もどる"
+        >
+          ←
+        </button>
+        <div className={styles.headTitle}>
+          <span className={styles.headEyebrow}>そうさ</span>
+          <span className={styles.headName}>{child.name}</span>
+        </div>
+        <div className={styles.headPig} style={{ background: swatch }}>
+          <PigMascot size={40} bounce={false} deco={child.deco} photoUrl={child.avatarUrl} />
+        </div>
       </header>
 
-      {/* 1. モードトグル */}
-      <div className={styles.modeToggle}>
-        <button
-          className={`${styles.modeButton} ${mode === 'income' ? styles.modeActive : ''} ${mode === 'income' ? styles.modeIncome : ''}`}
-          onClick={() => { setMode('income'); setPersonName(''); }}
-        >
-          あげる
-        </button>
-        <button
-          className={`${styles.modeButton} ${mode === 'expense' ? styles.modeActive : ''} ${mode === 'expense' ? styles.modeExpense : ''}`}
-          onClick={() => { setMode('expense'); setPersonName(''); }}
-        >
-          つかう
-        </button>
-      </div>
-
-      {/* 2. だれが？ / なにに？ */}
-      <div className={styles.nameSection}>
-        {mode === 'income' ? (
-          <div className={styles.quickNames}>
-            {QUICK_NAMES.map(name => (
-              <button
-                key={name}
-                className={`${styles.quickNamePill} ${personName === name ? styles.quickNameActive : ''}`}
-                onClick={() => setPersonName(name)}
-              >
-                {name}
-              </button>
-            ))}
-            <input
-              className={styles.nameInput}
-              type="text"
-              placeholder="ほかのひと"
-              value={QUICK_NAMES.includes(personName) ? '' : personName}
-              onChange={e => setPersonName(e.target.value)}
-              maxLength={20}
-            />
-          </div>
-        ) : (
-          <input
-            className={styles.usageInput}
-            type="text"
-            placeholder="なにに つかった？ (おかし、ゲーム など)"
-            value={personName}
-            onChange={e => setPersonName(e.target.value)}
-            maxLength={30}
+      <div className={styles.modeWrap}>
+        <div className={styles.modeTrack}>
+          <span
+            className={styles.modeThumb}
+            style={{
+              left: mode === 'income' ? '3px' : '50%',
+              background: mode === 'income' ? '#34C759' : '#F27CA7',
+            }}
           />
-        )}
-      </div>
-
-      {/* 3. 金額表示 */}
-      <div className={styles.amountDisplay}>
-        <span className={styles.amountPrefix}>{mode === 'income' ? '+' : '-'}</span>
-        <span className={styles.amountValue}>
-          {amount ? parseInt(amount, 10).toLocaleString() : '0'}
-        </span>
-        <span className={styles.amountUnit}>えん</span>
-      </div>
-
-      {/* 4. NumPad */}
-      <div className={styles.numPad}>
-        {['1', '2', '3', '4', '5', '6', '7', '8', '9', 'C', '0', '⌫'].map(key => (
           <button
-            key={key}
-            className={`${styles.numKey} ${key === 'C' || key === '⌫' ? styles.numKeyAlt : ''}`}
-            onClick={() => handleNumPad(key)}
+            type="button"
+            className={`${styles.modeBtn} ${mode === 'income' ? styles.modeBtnOn : ''}`}
+            onClick={() => setMode('income')}
           >
-            {key}
+            ＋ あげる
           </button>
-        ))}
+          <button
+            type="button"
+            className={`${styles.modeBtn} ${mode === 'expense' ? styles.modeBtnOn : ''}`}
+            onClick={() => setMode('expense')}
+          >
+            － つかう
+          </button>
+        </div>
       </div>
 
-      {/* 5. メモ (折りたたみ) */}
-      {showMemo ? (
+      <div className={styles.amountArea}>
+        <span className={styles.previewText}>
+          いま ¥{child.balance.toLocaleString()}
+          {amount && ` → ¥${preview.toLocaleString()}`}
+        </span>
+        <div className={styles.amountValue}>
+          <span className={styles.yenMark}>¥</span>
+          <span className={amount ? styles.amount : styles.amountPlaceholder}>
+            {amount ? parseInt(amount, 10).toLocaleString('ja-JP') : '0'}
+          </span>
+        </div>
+      </div>
+
+      <div className={styles.formBlock}>
         <input
           className={styles.memoInput}
           type="text"
-          placeholder="メモ (おてつだい、おかし など)"
+          placeholder={mode === 'income' ? 'メモ: おてつだい' : 'メモ: おかし'}
           value={memo}
           onChange={e => setMemo(e.target.value)}
           maxLength={50}
-          autoFocus
         />
-      ) : (
-        <button className={styles.memoToggle} onClick={() => setShowMemo(true)}>
-          + メモを追加
-        </button>
-      )}
+      </div>
 
-      {/* 6. 最近のやりとり */}
-      {recentTxns.length > 0 && (
-        <div className={styles.recentSection}>
-          <h2 className={styles.recentTitle}>さいきんの やりとり</h2>
+      <div className={styles.formBlock}>
+        <span className={styles.formLabel}>
+          だれが? <span className={styles.required}>*</span>
+        </span>
+        <div className={styles.chipRow}>
+          {QUICK_NAMES.map(n => (
+            <button
+              key={n}
+              type="button"
+              className={`${styles.chip} ${by === n ? styles.chipOn : ''}`}
+              onClick={() => setBy(n)}
+            >
+              {n}
+            </button>
+          ))}
+          <input
+            className={styles.byInput}
+            type="text"
+            placeholder="ほかのひと"
+            value={QUICK_NAMES.includes(by) ? '' : by}
+            onChange={e => setBy(e.target.value)}
+            maxLength={20}
+          />
+        </div>
+      </div>
+
+      <div className={styles.keypad}>
+        {(['1', '2', '3', 'AC', '4', '5', '6', '00', '7', '8', '9', '⌫', '_', '0', '_', 'OK'] as const).map((k, i) => {
+          if (k === '_') {
+            return <span key={`spacer-${i}`} />;
+          }
+          if (k === 'AC' || k === '00' || k === '⌫') {
+            return (
+              <button
+                key={k}
+                type="button"
+                className={`${styles.key} ${styles.keyAlt}`}
+                onClick={() => handleKey(k)}
+              >
+                {k}
+              </button>
+            );
+          }
+          if (k === 'OK') {
+            return (
+              <button
+                key={k}
+                type="button"
+                className={`${styles.key} ${styles.keyOk}`}
+                style={{
+                  background: !canSubmit
+                    ? '#C7C7CC'
+                    : mode === 'income'
+                      ? '#34C759'
+                      : '#F27CA7',
+                }}
+                disabled={!canSubmit}
+                onClick={submit}
+              >
+                {submitting ? '…' : 'OK'}
+              </button>
+            );
+          }
+          return (
+            <button
+              key={`${k}-${i}`}
+              type="button"
+              className={styles.key}
+              onClick={() => handleKey(k)}
+            >
+              {k}
+            </button>
+          );
+        })}
+      </div>
+
+      <section className={styles.recent}>
+        <h2 className={styles.recentTitle}>さいきんのそうさ</h2>
+        {recent.length === 0 ? (
+          <p className={styles.recentEmpty}>まだ そうさはありません</p>
+        ) : (
           <ul className={styles.recentList}>
-            {recentTxns.map(txn => (
-              <li key={txn.id} className={styles.recentItem}>
-                <span className={styles.recentName}>{txn.personName}</span>
-                <span className={`${styles.recentAmount} ${txn.type === 'income' ? styles.recentIncome : styles.recentExpense}`}>
-                  {txn.type === 'income' ? '+' : '-'}{txn.amount.toLocaleString()}
+            {recent.map(t => (
+              <li key={t.id} className={styles.recentRow}>
+                <span
+                  className={styles.recentBar}
+                  style={{
+                    background: t.type === 'income' ? '#34C759' : '#F27CA7',
+                  }}
+                />
+                <div className={styles.recentMid}>
+                  <span className={styles.recentMemo}>
+                    {t.memo?.trim() || (t.type === 'income' ? 'おこづかい' : 'つかった')}
+                  </span>
+                  <span className={styles.recentMeta}>
+                    {t.personName} · {fmtRelative(t.date)}
+                  </span>
+                </div>
+                <span
+                  className={styles.recentAmt}
+                  style={{ color: t.type === 'income' ? '#2E9D6E' : '#C94E7E' }}
+                >
+                  {t.type === 'income' ? '+' : '-'}¥{t.amount.toLocaleString()}
                 </span>
               </li>
             ))}
           </ul>
-        </div>
-      )}
-
-      {/* 7. 実行ボタン (fixed bottom) */}
-      <div className={styles.fixedBottom}>
-        <motion.button
-          className={`${styles.submitButton} ${mode === 'income' ? styles.submitIncome : styles.submitExpense}`}
-          onClick={handleSubmit}
-          disabled={!canSubmit}
-          whileTap={{ scale: 0.97 }}
-        >
-          {submitting
-            ? 'しょりちゅう...'
-            : !personName.trim()
-              ? mode === 'income' ? 'だれが？を えらんでね' : 'つかいみちを いれてね'
-              : !amount
-                ? 'きんがくを いれてね'
-                : mode === 'income'
-                  ? `${parseInt(amount, 10).toLocaleString()}えん あげる`
-                  : `${parseInt(amount, 10).toLocaleString()}えん つかう`
-          }
-        </motion.button>
-      </div>
+        )}
+      </section>
     </div>
   );
 }

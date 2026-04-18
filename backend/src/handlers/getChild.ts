@@ -22,6 +22,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     balance: result.Item.balance,
     avatarIndex: result.Item.avatarIndex,
     avatarUrl: result.Item.avatarUrl,
+    color: result.Item.color ?? 'pink',
+    deco: result.Item.deco ?? [],
     createdAt: result.Item.createdAt,
   });
 };

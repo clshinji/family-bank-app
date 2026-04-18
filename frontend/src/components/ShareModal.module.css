@@ -1,127 +1,146 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(92, 64, 51, 0.4);
+  background: rgba(28, 28, 30, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-md);
+  padding: 16px;
   z-index: 100;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
 
 .modal {
-  background: var(--color-bg-card);
-  border-radius: var(--radius-lg);
-  padding: var(--space-xl) var(--space-lg);
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 22px 22px 26px;
   width: 100%;
   max-width: 360px;
   position: relative;
-  box-shadow: 0 16px 48px rgba(92, 64, 51, 0.2);
+  box-shadow: 0 16px 48px rgba(28, 28, 30, 0.25);
+  font-family: var(--font-parent);
 }
 
 .closeButton {
   position: absolute;
-  top: var(--space-md);
-  right: var(--space-md);
-  font-size: 1.2rem;
-  color: var(--color-text-light);
-  padding: var(--space-xs);
-  line-height: 1;
+  top: 14px;
+  right: 14px;
+  font-size: 16px;
+  color: #8A8A95;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+}
+
+.closeButton:active {
+  background: #F2F2F7;
 }
 
 .profile {
-  text-align: center;
-  margin-bottom: var(--space-lg);
-}
-
-.avatar {
-  font-size: 3.5rem;
-  line-height: 1;
-  display: block;
-  margin-bottom: var(--space-sm);
+  width: 110px;
+  height: 110px;
+  border-radius: 55px;
+  margin: 6px auto 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .name {
-  font-size: 1.4rem;
-  font-weight: 900;
-  color: var(--color-text);
+  font-size: 20px;
+  font-weight: 800;
+  color: #1C1C1E;
+  text-align: center;
+  margin: 0 0 4px;
 }
 
 .subtitle {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--color-text-light);
-  margin-top: var(--space-xs);
+  font-size: 13px;
+  color: #8A8A95;
+  text-align: center;
+  margin: 0 0 18px;
 }
 
 .qrArea {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: var(--space-lg);
+  justify-content: center;
+  margin-bottom: 16px;
 }
 
 .qrWrapper {
-  background: white;
-  padding: var(--space-md);
-  border-radius: var(--radius-md);
-  box-shadow: 0 2px 12px var(--color-shadow);
+  position: relative;
+  background: #ffffff;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid #E5E5EA;
   line-height: 0;
 }
 
-.qrHint {
-  font-size: 0.8rem;
-  color: var(--color-text-light);
-  margin-top: var(--space-sm);
-  font-weight: 500;
+.qrCenter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 28px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid #ffffff;
+  box-shadow: 0 0 0 1px #E5E5EA;
 }
 
 .urlSection {
-  margin-top: var(--space-sm);
-}
-
-.urlLabel {
-  display: block;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--color-text-light);
-  margin-bottom: var(--space-xs);
+  margin-bottom: 16px;
 }
 
 .urlRow {
   display: flex;
-  gap: var(--space-xs);
+  gap: 8px;
+  background: #F2F2F7;
+  border-radius: 12px;
+  padding: 6px 6px 6px 12px;
+  align-items: center;
 }
 
 .urlInput {
   flex: 1;
-  padding: var(--space-sm) var(--space-md);
-  background: var(--color-bg);
-  border-radius: var(--radius-sm);
-  font-size: 0.78rem;
-  color: var(--color-text);
-  font-weight: 500;
+  background: none;
+  font-size: 12px;
+  color: #1C1C1E;
+  font-family: ui-monospace, monospace;
   min-width: 0;
-  border: 2px solid transparent;
-}
-
-.urlInput:focus {
-  border-color: var(--color-primary);
 }
 
 .copyButton {
-  padding: var(--space-sm) var(--space-md);
-  background: var(--color-primary);
-  color: var(--color-text);
+  padding: 8px 14px;
+  background: #1C1C1E;
+  color: #ffffff;
   font-weight: 700;
-  font-size: 0.85rem;
-  border-radius: var(--radius-sm);
+  font-size: 12px;
+  border-radius: 8px;
   white-space: nowrap;
-  transition: transform 0.15s;
+  font-family: inherit;
 }
 
 .copyButton:active {
   transform: scale(0.95);
+}
+
+.doneBtn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 14px;
+  background: #F27CA7;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 14px;
+  font-family: inherit;
 }
