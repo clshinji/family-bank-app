@@ -8,6 +8,7 @@ import { Toast } from '../components/Toast';
 import styles from './ParentOperate.module.css';
 
 const QUICK_NAMES = ['おかあさん', 'おとうさん', 'おばあちゃん', 'おじいちゃん'];
+const QUICK_PURPOSES = ['おかし', 'ジュース', 'ガチャガチャ', 'おもちゃ', 'ほん'];
 
 function fmtRelative(iso: string) {
   const d = new Date(iso);
@@ -27,10 +28,18 @@ export function ParentOperate() {
 
   const [child, setChild] = useState<Child | null>(null);
   const [recent, setRecent] = useState<Transaction[]>([]);
+  const [editing, setEditing] = useState<Transaction | null>(null);
   const [mode, setMode] = useState<'income' | 'expense'>('income');
   const [amount, setAmount] = useState('');
   const [memo, setMemo] = useState('');
   const [by, setBy] = useState('おかあさん');
+  const [purpose, setPurpose] = useState('');
+
+  const switchMode = (next: 'income' | 'expense') => {
+    if (next === mode) return;
+    setMode(next);
+    setMemo('');
+  };
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState({
     visible: false,
@@ -42,7 +51,7 @@ export function ParentOperate() {
     if (!childId) return;
     const [c, t] = await Promise.all([
       api.getChild(childId),
-      api.getTransactions(childId, 5),
+      api.getTransactions(childId, 8),
     ]);
     setChild(c);
     setRecent(t.items);
@@ -60,19 +69,22 @@ export function ParentOperate() {
   };
 
   const submit = async () => {
-    if (!child || !amount || !by.trim() || submitting) return;
+    if (!child || !amount || submitting) return;
     const n = parseInt(amount, 10);
     if (!n) return;
+    const personName = mode === 'income' ? by.trim() : purpose.trim();
+    if (!personName) return;
     setSubmitting(true);
     try {
       await api.postTransaction(child.childId, {
         type: mode,
         amount: n,
         memo: memo.trim() || undefined,
-        personName: by.trim(),
+        personName,
       });
       setAmount('');
       setMemo('');
+      setPurpose('');
       await refresh();
       setToast({
         visible: true,
@@ -89,6 +101,12 @@ export function ParentOperate() {
     setSubmitting(false);
   };
 
+  const handleEditSaved = async (updated: Transaction) => {
+    setEditing(null);
+    setRecent(prev => prev.map(t => (t.id === updated.id ? updated : t)));
+    setToast({ visible: true, message: 'へんこうを保存しました', type: 'success' });
+  };
+
   if (!child) {
     return (
       <div className={styles.loading}>
@@ -102,7 +120,8 @@ export function ParentOperate() {
     mode === 'income'
       ? child.balance + parseInt(amount || '0', 10)
       : child.balance - parseInt(amount || '0', 10);
-  const canSubmit = !!amount && !!by.trim() && !submitting;
+  const personFilled = mode === 'income' ? !!by.trim() : !!purpose.trim();
+  const canSubmit = !!amount && personFilled && !submitting;
 
   return (
     <div className={styles.screen}>
@@ -143,14 +162,14 @@ export function ParentOperate() {
           <button
             type="button"
             className={`${styles.modeBtn} ${mode === 'income' ? styles.modeBtnOn : ''}`}
-            onClick={() => setMode('income')}
+            onClick={() => switchMode('income')}
           >
             ＋ あげる
           </button>
           <button
             type="button"
             className={`${styles.modeBtn} ${mode === 'expense' ? styles.modeBtnOn : ''}`}
-            onClick={() => setMode('expense')}
+            onClick={() => switchMode('expense')}
           >
             － つかう
           </button>
@@ -174,38 +193,66 @@ export function ParentOperate() {
         <input
           className={styles.memoInput}
           type="text"
-          placeholder={mode === 'income' ? 'メモ: おてつだい' : 'メモ: おかし'}
+          placeholder={mode === 'income' ? 'メモ: おてつだい' : 'メモ: どこで など'}
           value={memo}
           onChange={e => setMemo(e.target.value)}
           maxLength={50}
         />
       </div>
 
-      <div className={styles.formBlock}>
-        <span className={styles.formLabel}>
-          だれが? <span className={styles.required}>*</span>
-        </span>
-        <div className={styles.chipRow}>
-          {QUICK_NAMES.map(n => (
-            <button
-              key={n}
-              type="button"
-              className={`${styles.chip} ${by === n ? styles.chipOn : ''}`}
-              onClick={() => setBy(n)}
-            >
-              {n}
-            </button>
-          ))}
+      {mode === 'income' ? (
+        <div className={styles.formBlock}>
+          <span className={styles.formLabel}>
+            だれが? <span className={styles.required}>*</span>
+          </span>
+          <div className={styles.chipRow}>
+            {QUICK_NAMES.map(n => (
+              <button
+                key={n}
+                type="button"
+                className={`${styles.chip} ${by === n ? styles.chipOn : ''}`}
+                onClick={() => setBy(n)}
+              >
+                {n}
+              </button>
+            ))}
+            <input
+              className={styles.byInput}
+              type="text"
+              placeholder="ほかのひと"
+              value={QUICK_NAMES.includes(by) ? '' : by}
+              onChange={e => setBy(e.target.value)}
+              maxLength={20}
+            />
+          </div>
+        </div>
+      ) : (
+        <div className={styles.formBlock}>
+          <span className={styles.formLabel}>
+            なににつかった? <span className={styles.required}>*</span>
+          </span>
+          <div className={styles.chipRow}>
+            {QUICK_PURPOSES.map(p => (
+              <button
+                key={p}
+                type="button"
+                className={`${styles.chip} ${purpose === p ? styles.chipOn : ''}`}
+                onClick={() => setPurpose(p)}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
           <input
-            className={styles.byInput}
+            className={styles.purposeInput}
             type="text"
-            placeholder="ほかのひと"
-            value={QUICK_NAMES.includes(by) ? '' : by}
-            onChange={e => setBy(e.target.value)}
-            maxLength={20}
+            placeholder="れい: おかし、ガチャ"
+            value={purpose}
+            onChange={e => setPurpose(e.target.value)}
+            maxLength={30}
           />
         </div>
-      </div>
+      )}
 
       <div className={styles.keypad}>
         {(['1', '2', '3', 'AC', '4', '5', '6', '00', '7', '8', '9', '⌫', '_', '0', '_', 'OK'] as const).map((k, i) => {
@@ -258,38 +305,165 @@ export function ParentOperate() {
       </div>
 
       <section className={styles.recent}>
-        <h2 className={styles.recentTitle}>さいきんのそうさ</h2>
+        <div className={styles.recentHeader}>
+          <h2 className={styles.recentTitle}>さいきんのそうさ</h2>
+          <span className={styles.recentHint}>タップでへんしゅう</span>
+        </div>
         {recent.length === 0 ? (
           <p className={styles.recentEmpty}>まだ そうさはありません</p>
         ) : (
           <ul className={styles.recentList}>
             {recent.map(t => (
-              <li key={t.id} className={styles.recentRow}>
-                <span
-                  className={styles.recentBar}
-                  style={{
-                    background: t.type === 'income' ? '#34C759' : '#F27CA7',
-                  }}
-                />
-                <div className={styles.recentMid}>
-                  <span className={styles.recentMemo}>
-                    {t.memo?.trim() || (t.type === 'income' ? 'おこづかい' : 'つかった')}
-                  </span>
-                  <span className={styles.recentMeta}>
-                    {t.personName} · {fmtRelative(t.date)}
-                  </span>
-                </div>
-                <span
-                  className={styles.recentAmt}
-                  style={{ color: t.type === 'income' ? '#2E9D6E' : '#C94E7E' }}
+              <li key={t.id}>
+                <button
+                  type="button"
+                  className={styles.recentRow}
+                  onClick={() => setEditing(t)}
                 >
-                  {t.type === 'income' ? '+' : '-'}¥{t.amount.toLocaleString()}
-                </span>
+                  <span
+                    className={styles.recentBar}
+                    style={{
+                      background: t.type === 'income' ? '#34C759' : '#F27CA7',
+                    }}
+                  />
+                  <div className={styles.recentMid}>
+                    <span className={styles.recentMemo}>
+                      {t.memo?.trim() || (t.type === 'income' ? 'おこづかい' : 'つかった')}
+                    </span>
+                    <span className={styles.recentMeta}>
+                      {t.personName} · {fmtRelative(t.date)}
+                    </span>
+                  </div>
+                  <span
+                    className={styles.recentAmt}
+                    style={{ color: t.type === 'income' ? '#2E9D6E' : '#C94E7E' }}
+                  >
+                    {t.type === 'income' ? '+' : '-'}¥{t.amount.toLocaleString()}
+                  </span>
+                </button>
               </li>
             ))}
           </ul>
         )}
       </section>
+
+      {editing && (
+        <EditTransactionModal
+          childId={child.childId}
+          transaction={editing}
+          onClose={() => setEditing(null)}
+          onSaved={handleEditSaved}
+        />
+      )}
+    </div>
+  );
+}
+
+interface EditTransactionModalProps {
+  childId: string;
+  transaction: Transaction;
+  onClose: () => void;
+  onSaved: (updated: Transaction) => void;
+}
+
+function EditTransactionModal({
+  childId,
+  transaction,
+  onClose,
+  onSaved,
+}: EditTransactionModalProps) {
+  const [memo, setMemo] = useState(transaction.memo ?? '');
+  const [personName, setPersonName] = useState(transaction.personName);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const isIncome = transaction.type === 'income';
+  const personLabel = isIncome ? 'だれが?' : 'なににつかった?';
+  const quickItems = isIncome ? QUICK_NAMES : QUICK_PURPOSES;
+  const otherPlaceholder = isIncome ? 'ほかのひと' : 'ほかのつかいみち';
+
+  const submit = async () => {
+    if (!personName.trim() || submitting) return;
+    setSubmitting(true);
+    setError('');
+    try {
+      const updated = await api.updateTransaction(childId, transaction.id, {
+        personName: personName.trim(),
+        memo: memo.trim() || null,
+      });
+      onSaved(updated);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '保存できませんでした');
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={`pop-in ${styles.modalSheet}`} onClick={e => e.stopPropagation()}>
+        <span className={styles.modalGrip} />
+        <h2 className={styles.modalTitle}>そうさをへんしゅう</h2>
+        <p className={styles.modalLead}>
+          きんがくは かえられません。<br />
+          <span
+            className={styles.modalAmount}
+            style={{ color: isIncome ? '#2E9D6E' : '#C94E7E' }}
+          >
+            {isIncome ? '+' : '-'}¥{transaction.amount.toLocaleString()}
+          </span>
+          <span className={styles.modalDate}>
+            ・{new Date(transaction.date).toLocaleString('ja-JP')}
+          </span>
+        </p>
+
+        <label className={styles.formLabel}>{personLabel}</label>
+        <div className={styles.chipRow}>
+          {quickItems.map(n => (
+            <button
+              key={n}
+              type="button"
+              className={`${styles.chip} ${personName === n ? styles.chipOn : ''}`}
+              onClick={() => setPersonName(n)}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
+        <input
+          className={styles.modalInput}
+          type="text"
+          placeholder={otherPlaceholder}
+          value={personName}
+          onChange={e => setPersonName(e.target.value)}
+          maxLength={30}
+        />
+
+        <label className={styles.formLabel}>メモ</label>
+        <input
+          className={styles.modalInput}
+          type="text"
+          placeholder="メモ"
+          value={memo}
+          onChange={e => setMemo(e.target.value)}
+          maxLength={50}
+        />
+
+        {error && <p className={styles.formError}>{error}</p>}
+
+        <div className={styles.modalActions}>
+          <button type="button" className={styles.btnGhostWide} onClick={onClose}>
+            キャンセル
+          </button>
+          <button
+            type="button"
+            className={styles.btnPrimaryWide}
+            onClick={submit}
+            disabled={!personName.trim() || submitting}
+          >
+            {submitting ? '保存中…' : '保存 ✓'}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

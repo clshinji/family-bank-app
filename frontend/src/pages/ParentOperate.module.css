@@ -203,6 +203,17 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
+.purposeInput {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fff;
+  font-size: 14px;
+  color: #1C1C1E;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
 .keypad {
   padding: 8px 12px 10px;
   display: grid;
@@ -254,13 +265,25 @@
   margin-top: 6px;
 }
 
+.recentHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0 4px;
+}
+
 .recentTitle {
   font-size: 11px;
   color: #8A8A95;
   font-weight: 700;
   letter-spacing: 0.5px;
-  padding: 8px 0 4px;
   margin: 0;
+}
+
+.recentHint {
+  font-size: 10px;
+  color: #C7C7CC;
+  font-weight: 600;
 }
 
 .recentEmpty {
@@ -280,8 +303,21 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6px 0;
+  padding: 8px 6px;
   font-size: 13px;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.recentRow:active {
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .recentBar {
@@ -323,4 +359,108 @@
   align-items: center;
   justify-content: center;
   background: #F2F2F7;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 100;
+  animation: fadein 0.18s ease;
+}
+
+.modalSheet {
+  width: 100%;
+  max-width: 480px;
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  padding: 22px 22px calc(env(safe-area-inset-bottom, 0px) + 28px);
+  position: relative;
+}
+
+.modalGrip {
+  display: block;
+  width: 36px;
+  height: 4px;
+  background: #D1D1D6;
+  border-radius: 2px;
+  margin: -8px auto 14px;
+}
+
+.modalTitle {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1C1C1E;
+  margin: 0 0 6px;
+}
+
+.modalLead {
+  font-size: 13px;
+  color: #8A8A95;
+  margin: 0 0 18px;
+  line-height: 1.6;
+}
+
+.modalAmount {
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.modalDate {
+  font-size: 12px;
+  color: #C7C7CC;
+}
+
+.modalInput {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #E5E5EA;
+  background: #fff;
+  font-size: 15px;
+  color: #1C1C1E;
+  margin-bottom: 14px;
+}
+
+.formError {
+  font-size: 12px;
+  color: #E54A5F;
+  margin: 4px 0 0;
+}
+
+.modalActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.btnGhostWide {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #E5E5EA;
+  background: #fff;
+  color: #1C1C1E;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+}
+
+.btnPrimaryWide {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  background: #1C1C1E;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  font-family: inherit;
+}
+
+.btnPrimaryWide:disabled {
+  background: #C7C7CC;
+  cursor: not-allowed;
 }

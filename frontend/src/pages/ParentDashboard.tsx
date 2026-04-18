@@ -27,6 +27,7 @@ export function ParentDashboard() {
   const [loading, setLoading] = useState(true);
 
   const [showAdd, setShowAdd] = useState(false);
+  const [editKid, setEditKid] = useState<Child | null>(null);
   const [confirmDel, setConfirmDel] = useState<Child | null>(null);
   const [delStep, setDelStep] = useState<1 | 2>(1);
   const [shareKid, setShareKid] = useState<Child | null>(null);
@@ -168,6 +169,7 @@ export function ParentDashboard() {
         <div className={styles.kidList}>
           {children.map(k => {
             const swatch = THEMES[k.color ?? 'pink'].swatch;
+            const colorLabel = COLORS.find(c => c.id === (k.color ?? 'pink'))?.label;
             return (
               <article key={k.childId} className={styles.kidCard}>
                 <button
@@ -188,17 +190,20 @@ export function ParentDashboard() {
                     {uploadingId === k.childId ? '…' : '📷'}
                   </span>
                 </button>
-                <div className={styles.kidBody}>
+                <button
+                  type="button"
+                  className={styles.kidBody}
+                  onClick={() => navigate(`/parent/${k.childId}`)}
+                  aria-label={`${k.name}のそうさ画面へ`}
+                >
                   <span className={styles.kidName}>{k.name}</span>
-                  <span className={styles.kidMeta}>
-                    {COLORS.find(c => c.id === (k.color ?? 'pink'))?.label}テーマ
-                  </span>
+                  <span className={styles.kidMeta}>{colorLabel}テーマ</span>
                   <span
                     className={`${styles.kidBalance} ${k.balance < 0 ? styles.kidBalanceNeg : ''}`}
                   >
                     ¥{k.balance.toLocaleString()}
                   </span>
-                </div>
+                </button>
                 <div className={styles.kidActions}>
                   <button
                     type="button"
@@ -213,6 +218,13 @@ export function ParentDashboard() {
                     onClick={() => setShareKid(k)}
                   >
                     QR
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.btnGhost}
+                    onClick={() => setEditKid(k)}
+                  >
+                    ✎ へんこう
                   </button>
                   <button
                     type="button"
@@ -236,12 +248,26 @@ export function ParentDashboard() {
       </button>
 
       {showAdd && (
-        <AddKidModal
+        <KidFormModal
+          mode="add"
           onClose={() => setShowAdd(false)}
-          onCreated={async () => {
+          onSaved={async () => {
             setShowAdd(false);
             await fetchChildren();
             setToast({ visible: true, message: 'こどもを追加しました', type: 'success' });
+          }}
+        />
+      )}
+
+      {editKid && (
+        <KidFormModal
+          mode="edit"
+          initial={editKid}
+          onClose={() => setEditKid(null)}
+          onSaved={async () => {
+            setEditKid(null);
+            await fetchChildren();
+            setToast({ visible: true, message: 'へんこうを保存しました', type: 'success' });
           }}
         />
       )}
@@ -276,23 +302,32 @@ export function ParentDashboard() {
   );
 }
 
-interface AddKidModalProps {
+interface KidFormModalProps {
+  mode: 'add' | 'edit';
+  initial?: Child;
   onClose: () => void;
-  onCreated: () => void;
+  onSaved: () => void;
 }
 
-function AddKidModal({ onClose, onCreated }: AddKidModalProps) {
-  const [name, setName] = useState('');
-  const [color, setColor] = useState<ThemeColor>('pink');
+function KidFormModal({ mode, initial, onClose, onSaved }: KidFormModalProps) {
+  const [name, setName] = useState(initial?.name ?? '');
+  const [color, setColor] = useState<ThemeColor>(initial?.color ?? 'pink');
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const submit = async () => {
     if (!name.trim() || submitting) return;
     setSubmitting(true);
+    setError('');
     try {
-      await api.createChild({ name: name.trim(), color, deco: [] });
-      onCreated();
-    } catch {
+      if (mode === 'add') {
+        await api.createChild({ name: name.trim(), color, deco: [] });
+      } else if (initial) {
+        await api.updateChild(initial.childId, { name: name.trim(), color });
+      }
+      onSaved();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '保存できませんでした');
       setSubmitting(false);
     }
   };
@@ -301,8 +336,12 @@ function AddKidModal({ onClose, onCreated }: AddKidModalProps) {
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={`pop-in ${styles.modalSheet}`} onClick={e => e.stopPropagation()}>
         <span className={styles.modalGrip} />
-        <h2 className={styles.modalTitle}>こどもをついか</h2>
-        <p className={styles.modalLead}>なまえとテーマカラーをえらんでください</p>
+        <h2 className={styles.modalTitle}>
+          {mode === 'add' ? 'こどもをついか' : 'こどもじょうほうをへんこう'}
+        </h2>
+        <p className={styles.modalLead}>
+          {mode === 'add' ? 'なまえとテーマカラーをえらんでください' : 'なまえとテーマカラーをかえられます'}
+        </p>
 
         <label className={styles.formLabel}>なまえ</label>
         <input
@@ -328,6 +367,8 @@ function AddKidModal({ onClose, onCreated }: AddKidModalProps) {
           ))}
         </div>
 
+        {error && <p className={styles.formError}>{error}</p>}
+
         <div className={styles.modalActions}>
           <button type="button" className={styles.btnGhostWide} onClick={onClose}>
             キャンセル
@@ -338,7 +379,7 @@ function AddKidModal({ onClose, onCreated }: AddKidModalProps) {
             onClick={submit}
             disabled={!name.trim() || submitting}
           >
-            {submitting ? 'ついか中…' : 'ついか ✓'}
+            {submitting ? '保存中…' : mode === 'add' ? 'ついか ✓' : '保存 ✓'}
           </button>
         </div>
       </div>

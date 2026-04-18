@@ -8,3 +8,4 @@ cdk.out/
 !vite.config.ts
 .DS_Store
 test-results/
+.claude/

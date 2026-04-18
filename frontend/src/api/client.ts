@@ -60,6 +60,19 @@ export const api = {
       body: JSON.stringify(data),
     }),
 
+  updateTransaction: (
+    childId: string,
+    txnId: string,
+    data: { personName?: string; memo?: string | null },
+  ) =>
+    request<import('../types').Transaction>(
+      `/children/${childId}/transactions/${encodeURIComponent(txnId)}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      },
+    ),
+
   deleteChild: (childId: string) =>
     request<{ deleted: boolean }>(`/children/${childId}`, {
       method: 'DELETE',

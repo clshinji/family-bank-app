@@ -103,6 +103,12 @@ export class BackendStack extends cdk.Stack {
       functionName: 'FamilyBank-PostTransaction',
     });
 
+    const updateTransactionFn = new nodejs.NodejsFunction(this, 'UpdateTransactionFn', {
+      ...sharedLambdaProps,
+      entry: path.join(handlersDir, 'updateTransaction.ts'),
+      functionName: 'FamilyBank-UpdateTransaction',
+    });
+
     const deleteChildFn = new nodejs.NodejsFunction(this, 'DeleteChildFn', {
       ...sharedLambdaProps,
       entry: path.join(handlersDir, 'deleteChild.ts'),
@@ -120,7 +126,7 @@ export class BackendStack extends cdk.Stack {
     });
 
     // Grant DynamoDB access
-    [getChildFn, listChildrenFn, createChildFn, updateChildFn, getTransactionsFn, postTransactionFn, deleteChildFn, getAvatarUploadUrlFn]
+    [getChildFn, listChildrenFn, createChildFn, updateChildFn, getTransactionsFn, postTransactionFn, updateTransactionFn, deleteChildFn, getAvatarUploadUrlFn]
       .forEach(fn => table.grantReadWriteData(fn));
 
     // Grant S3 access for avatar upload
@@ -158,6 +164,10 @@ export class BackendStack extends cdk.Stack {
     const transactions = child.addResource('transactions');
     transactions.addMethod('GET', new apigateway.LambdaIntegration(getTransactionsFn));
     transactions.addMethod('POST', new apigateway.LambdaIntegration(postTransactionFn));
+
+    // /children/{childId}/transactions/{txnId}
+    const transaction = transactions.addResource('{txnId}');
+    transaction.addMethod('PUT', new apigateway.LambdaIntegration(updateTransactionFn));
 
     this.apiUrl = api.url;
 

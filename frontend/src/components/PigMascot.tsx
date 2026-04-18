@@ -131,6 +131,48 @@ export function PigMascot({
   const coinSlot = '#6B3F52';
   const photoClip = useMemo(() => `pig-photo-${Math.random().toString(36).slice(2, 9)}`, []);
 
+  if (photoUrl) {
+    return (
+      <div
+        style={{ width: size, height: size, display: 'inline-block' }}
+        className={bounce ? 'pig-idle' : ''}
+      >
+        <svg viewBox="0 0 248 220" width={size} height={size}>
+          <defs>
+            <clipPath id={photoClip}>
+              <circle cx={124} cy={114} r={92} />
+            </clipPath>
+          </defs>
+
+          <ellipse cx={124} cy={208} rx={84} ry={8} fill="rgba(61,42,78,0.15)" />
+
+          <circle cx={124} cy={114} r={96} fill="#FFFFFF" />
+
+          <image
+            href={photoUrl}
+            x={32}
+            y={22}
+            width={184}
+            height={184}
+            preserveAspectRatio="xMidYMid slice"
+            clipPath={`url(#${photoClip})`}
+          />
+
+          <circle
+            cx={124}
+            cy={114}
+            r={92}
+            fill="none"
+            stroke="rgba(61,42,78,0.18)"
+            strokeWidth={3}
+          />
+
+          {renderDeco(deco)}
+        </svg>
+      </div>
+    );
+  }
+
   return (
     <div
       style={{ width: size, height: size, display: 'inline-block' }}
@@ -142,11 +184,6 @@ export function PigMascot({
             <stop offset="0%" stopColor="#F27CA7" stopOpacity="0.5" />
             <stop offset="70%" stopColor="#F27CA7" stopOpacity="0" />
           </radialGradient>
-          {photoUrl && (
-            <clipPath id={photoClip}>
-              <ellipse cx={124} cy={128} rx={86} ry={66} />
-            </clipPath>
-          )}
         </defs>
 
         <ellipse cx={124} cy={202} rx={78} ry={8} fill="rgba(61,42,78,0.15)" />
@@ -156,19 +193,6 @@ export function PigMascot({
 
         <ellipse cx={124} cy={128} rx={96} ry={72} fill={bodyFill} />
         <ellipse cx={124} cy={128} rx={96} ry={72} fill="url(#pigShadow)" opacity={0.3} />
-
-        {photoUrl && (
-          <image
-            href={photoUrl}
-            x={38}
-            y={62}
-            width={172}
-            height={132}
-            preserveAspectRatio="xMidYMid slice"
-            clipPath={`url(#${photoClip})`}
-            opacity={0.95}
-          />
-        )}
 
         <path
           d="M218 120 Q236 112 232 98 Q228 88 216 94"
@@ -186,21 +210,17 @@ export function PigMascot({
         <rect x={108} y={56} width={32} height={6} rx={3} fill={coinSlot} />
         <rect x={108} y={56} width={32} height={2.5} rx={1.2} fill="#4A2638" />
 
-        {!photoUrl && (
-          <>
-            <ellipse cx={124} cy={122} rx={34} ry={24} fill={snout} />
-            <ellipse cx={114} cy={118} rx={3.5} ry={5} fill={coinSlot} />
-            <ellipse cx={134} cy={118} rx={3.5} ry={5} fill={coinSlot} />
+        <ellipse cx={124} cy={122} rx={34} ry={24} fill={snout} />
+        <ellipse cx={114} cy={118} rx={3.5} ry={5} fill={coinSlot} />
+        <ellipse cx={134} cy={118} rx={3.5} ry={5} fill={coinSlot} />
 
-            <circle cx={82} cy={118} r={10} fill={cheek} />
-            <circle cx={166} cy={118} r={10} fill={cheek} />
+        <circle cx={82} cy={118} r={10} fill={cheek} />
+        <circle cx={166} cy={118} r={10} fill={cheek} />
 
-            <Eye x={96} mood={mood} />
-            <Eye x={152} isRight mood={mood} />
+        <Eye x={96} mood={mood} />
+        <Eye x={152} isRight mood={mood} />
 
-            <Mouth mood={mood} />
-          </>
-        )}
+        <Mouth mood={mood} />
 
         {renderDeco(deco)}
       </svg>
